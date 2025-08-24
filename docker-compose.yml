@@ -1,0 +1,42 @@
+services:
+  mysql:
+    image: mysql:oraclelinux9
+    container_name: master
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./config/master.cnf:/etc/mysql/conf.d/my.cnf
+      - ./config/master.sql:/docker-entrypoint-initdb.d/start.sql
+    restart: on-failure
+    networks:
+      - mysql-network
+
+  mysql-replica:
+    image: mysql:oraclelinux9
+    container_name: replica1
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - ./replica-data:/var/lib/mysql
+      - ./config/replica.cnf:/etc/mysql/conf.d/my.cnf
+      - ./config/replica.sql:/docker-entrypoint-initdb.d/start.sql
+    restart: on-failure
+    networks:
+      - mysql-network
+
+networks:
+  mysql-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+  replica-data:
+    driver: local
